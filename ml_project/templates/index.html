@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lens — Customer Categories</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{
+  --bg:#fcfcf9;
+  --bg-soft:#f7f5f2;
+  --panel:#ffffff;
+  --panel-soft:#fdfcfa;
+  --line:#ece9e3;
+  --line-strong:#e3ddd4;
+  --ink:#171412;
+  --ink-soft:#2a2520;
+  --muted:#8a847c;
+  --muted2:#b8b0a6;
+  --accent:#171412;
+  --mono:'JetBrains Mono',monospace;
+  --radius:14px;
+  --radius-sm:10px;
+  --radius-full:999px;
+  --shadow-sm:0 1px 2px rgba(28,25,23,0.04), 0 1px 1px rgba(28,25,23,0.03);
+  --shadow-md:0 8px 24px rgba(28,25,23,0.06), 0 2px 8px rgba(28,25,23,0.04);
+  --shadow-lg:0 16px 40px rgba(28,25,23,0.08), 0 4px 12px rgba(28,25,23,0.05);
+  --ease: cubic-bezier(0.16,1,0.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:13.5px;line-height:1.55;-webkit-font-smoothing:antialiased;letter-spacing:-0.01em}
+.mono{font-family:var(--mono);letter-spacing:-0.02em}
+.app{display:flex;min-height:100vh;background: radial-gradient(1200px 600px at 20% -10%, #f5efe6 0%, transparent 60%), radial-gradient(900px 500px at 90% 0%, #ede7f5 0%, transparent 50%), var(--bg)}
+.sidebar{width:248px;background:rgba(255,255,255,0.85);backdrop-filter:blur(16px);border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;flex-shrink:0;z-index:20}
+@media(max-width:980px){.sidebar{width:100%;height:auto;position:relative;border-right:none;border-bottom:1px solid var(--line)}}
+.side-top{padding:20px 18px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+.side-logo{width:32px;height:32px;background:var(--ink);color:white;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;box-shadow:var(--shadow-sm)}
+.side-nav{padding:14px 10px;flex:1;overflow:auto}
+.nav-label{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted2);font-weight:700;padding:0 10px;margin:16px 0 8px}
+.nav-label:first-child{margin-top:0}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;color:var(--muted);cursor:pointer;font-weight:500;font-size:13px;transition:all 0.2s var(--ease);user-select:none;position:relative}
+.nav-item:hover{background:var(--bg-soft);color:var(--ink-soft);transform:translateX(1px)}
+.nav-item.active{background:var(--ink);color:white;box-shadow:var(--shadow-sm)}
+.nav-item.active:hover{background:var(--ink-soft);transform:none}
+.nav-item .count{margin-left:auto;font-size:11px;background:var(--bg-soft);color:var(--muted);padding:2px 7px;border-radius:999px;font-family:var(--mono);font-weight:500;transition:all 0.2s var(--ease)}
+.nav-item.active .count{background:rgba(255,255,255,0.16);color:rgba(255,255,255,0.8)}
+.side-bottom{padding:14px 12px;border-top:1px solid var(--line);display:flex;align-items:center;gap:10px;background:var(--panel-soft)}
+.avatar{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg, #e7ddd0, #ddd6e8);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:var(--ink-soft);box-shadow:var(--shadow-sm);flex-shrink:0}
+.main{flex:1;min-width:0}
+.topbar{height:56px;background:rgba(252,252,249,0.8);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:10}
+.search{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);padding:8px 12px;border-radius:12px;color:var(--muted);font-size:13px;width:320px;transition:all 0.2s var(--ease);box-shadow:var(--shadow-sm)}
+.search:hover{border-color:var(--line-strong);box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.search:focus-within{background:white;border-color:var(--ink);box-shadow:0 0 0 4px rgba(23,20,18,0.06), var(--shadow-md)}
+.search input{border:none;background:transparent;outline:none;width:100%;font-size:13px;color:var(--ink)}
+.search input::placeholder{color:var(--muted2)}
+.content{padding:28px;max-width:1360px;margin:0 auto}
+@media(min-width:1100px){.content{padding:32px}}
+.h1{font-size:22px;font-weight:700;letter-spacing:-0.03em;line-height:1.2}
+.sub{color:var(--muted);font-size:13px;margin-top:6px;line-height:1.5;max-width:640px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);transition:all 0.3s var(--ease)}
+.card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px);border-color:var(--line-strong)}
+.card-pad{padding:18px}
+.divider{height:1px;background:linear-gradient(90deg, transparent, var(--line), transparent);margin:16px 0}
+.btn{padding:8px 14px;border-radius:10px;border:1px solid var(--line);background:white;font-weight:600;font-size:12.5px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all 0.2s var(--ease);user-select:none;box-shadow:var(--shadow-sm)}
+.btn:hover{border-color:var(--ink);box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.btn:active{transform:translateY(0) scale(0.98);box-shadow:var(--shadow-sm)}
+.btn-primary{background:var(--ink);color:white;border-color:var(--ink);box-shadow:0 2px 8px rgba(23,20,18,0.15)}
+.btn-primary:hover{background:var(--ink-soft);box-shadow:0 4px 16px rgba(23,20,18,0.2);transform:translateY(-1px)}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--muted);box-shadow:none}
+.btn-ghost:hover{background:var(--bg-soft);color:var(--ink);box-shadow:none;transform:none}
+.pill{padding:4px 10px;border-radius:999px;font-size:11px;font-weight:650;border:1px solid;display:inline-flex;align-items:center;gap:6px;letter-spacing:0.01em;transition:all 0.2s var(--ease)}
+.pill-occasional{background:#f7f3ef;color:#5c564f;border-color:#ece3d8}
+.pill-regular{background:#eef4ff;color:#1e3a8a;border-color:#dbe6fe}
+.pill-loyal{background:#eefbf0;color:#14532d;border-color:#d1f0d5}
+.pill-high_value{background:#f5f0ff;color:#4c1d95;border-color:#e9ddff}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:var(--radius);background:white;box-shadow:var(--shadow-sm)}
+.table{width:100%;border-collapse:separate;border-spacing:0;min-width:900px}
+.table th{font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted2);font-weight:700;text-align:left;padding:12px 14px;background:var(--panel-soft);border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0;z-index:1}
+.table td{padding:12px 14px;border-bottom:1px solid #f5f2ed;font-size:13px;white-space:nowrap;transition:all 0.15s var(--ease)}
+.table tr:last-child td{border-bottom:none}
+.table tr{transition:all 0.15s var(--ease)}
+.table tbody tr:hover td{background:#fdf8f1}
+.table tbody tr{cursor:pointer}
+.input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:white;font-size:13px;outline:none;transition:all 0.2s var(--ease);box-shadow:var(--shadow-sm)}
+.input:hover{border-color:var(--line-strong)}
+.input:focus{border-color:var(--ink);box-shadow:0 0 0 4px rgba(23,20,18,0.06), var(--shadow-sm)}
+.label{font-size:11px;font-weight:650;color:#57534e;display:block;margin-bottom:6px;letter-spacing:0.02em}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
+@media(max-width:980px){.grid-2,.grid-3{grid-template-columns:1fr}}
+.kpi{padding:16px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(180deg, white, var(--panel-soft));box-shadow:var(--shadow-sm);transition:all 0.3s var(--ease);position:relative;overflow:hidden}
+.kpi:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);border-color:var(--line-strong)}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg, transparent, rgba(0,0,0,0.04), transparent)}
+.kpi-l{font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted2);font-weight:700}
+.kpi-v{font-family:var(--mono);font-size:20px;font-weight:600;margin-top:6px;letter-spacing:-0.02em}
+.kpi-s{font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.4}
+.tab{display:none}.tab.active{display:block;animation:fadeUp 0.4s var(--ease)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.bar{height:6px;background:#f1ece4;border-radius:999px;overflow:hidden}
+.bar-fill{height:100%;border-radius:999px;background:var(--ink);transition:width 0.8s var(--ease)}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;box-shadow:0 0 0 2px rgba(0,0,0,0.04)}
+#debug-banner{display:none;background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:12px 14px;border-radius:12px;margin-bottom:18px;font-size:12px;line-height:1.5;box-shadow:var(--shadow-sm)}
+.skeleton{height:14px;background:linear-gradient(90deg, #f5f2ed 25%, #ece7df 50%, #f5f2ed 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:6px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.empty-illust{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg, #f7f3ef, #ece6f3);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:20px;box-shadow:var(--shadow-sm)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="side-top">
+      <div class="side-logo">L</div>
+      <div><div style="font-weight:700;font-size:14px;letter-spacing:-0.02em">Lens</div><div style="font-size:11px;color:var(--muted);margin-top:1px">Retail • 50k customers</div></div>
+      <div style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--muted);background:var(--bg-soft);border:1px solid var(--line);padding:3px 7px;border-radius:8px">v3.0</div>
+    </div>
+    <div class="side-nav">
+      <div class="nav-group">
+        <div class="nav-label">Workspace</div>
+        <div class="nav-item active" data-tab="customers" onclick="window.switchTab('customers')"><span>◫</span> Customers <span class="count" id="count-customers">—</span></div>
+        <div class="nav-item" data-tab="predict" onclick="window.switchTab('predict')"><span>◐</span> Predict <span class="count">live</span></div>
+        <div class="nav-item" data-tab="segments" onclick="window.switchTab('segments')"><span>◍</span> Segments</div>
+        <div class="nav-item" data-tab="activity" onclick="window.switchTab('activity')"><span>↻</span> Activity <span class="count" id="count-activity">0</span></div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">Explore</div>
+        <div class="nav-item" data-tab="insights" onclick="window.switchTab('insights')"><span>◑</span> Insights</div>
+        <div style="padding:8px;margin-top:8px"><div style="background:linear-gradient(180deg, white, #fdf6ee);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow-sm)"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:11px;font-weight:700;letter-spacing:0.02em">Model health</div><div style="width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,0.15)"></div></div><div style="font-family:var(--mono);font-size:22px;margin-top:8px;font-weight:600;letter-spacing:-0.03em" id="acc-side">66.4%</div><div style="font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.4">50k customers • 4 classes<br>Real Kaggle data</div><div class="bar" style="margin-top:12px"><div class="bar-fill" id="acc-bar" style="width:66%"></div></div><div style="font-size:10px;color:var(--muted2);margin-top:8px;display:flex;gap:6px;align-items:center"><span style="width:5px;height:5px;border-radius:50%;background:#22c55e;display:inline-block"></span> Live • No drift</div></div></div>
+      </div>
+    </div>
+    <div class="side-bottom">
+      <div class="avatar">RO</div>
+      <div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:650;letter-spacing:-0.01em">Retail Ops</div><div style="font-size:11px;color:var(--muted);margin-top:1px">Workspace • Live • 50k</div></div>
+      <div style="width:20px;height:20px;border-radius:8px;background:var(--bg-soft);border:1px solid var(--line);display:grid;place-items:center;font-size:11px;color:var(--muted2)">⌘K</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="search"><span style="color:var(--muted2);font-size:14px">⌕</span><input id="search" placeholder="Search customers, categories…"><span style="font-size:10px;color:var(--muted2);background:var(--bg-soft);border:1px solid var(--line);padding:3px 6px;border-radius:7px;font-family:var(--mono)">/</span></div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:8px" class="mono" id="top-stats"><span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;box-shadow:0 0 0 3px rgba(34,197,94,0.12)"></span> <span id="top-stats-text">0 predictions • live</span></div>
+        <div style="width:1px;height:18px;background:var(--line)"></div>
+        <button type="button" class="btn btn-primary" onclick="window.switchTab('predict')"><span>✦</span> New prediction</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div id="debug-banner"></div>
+
+      <div id="tab-customers" class="tab active">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;margin-bottom:20px">
+          <div><div class="h1">Customers</div><div class="sub">Real retail data — 120 sampled from 50,000. Every row is a real Kaggle customer with realistic behavior. Click any row to load into predictor.</div></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button type="button" class="btn" data-filter="all" onclick="window.filterCat('all')">All</button>
+            <button type="button" class="btn" data-filter="Occasional" onclick="window.filterCat('Occasional')"><span class="dot" style="background:#8a7d6e"></span> Occasional</button>
+            <button type="button" class="btn" data-filter="Regular" onclick="window.filterCat('Regular')"><span class="dot" style="background:#3b82f6"></span> Regular</button>
+            <button type="button" class="btn" data-filter="Loyal" onclick="window.filterCat('Loyal')"><span class="dot" style="background:#22c55e"></span> Loyal</button>
+            <button type="button" class="btn" data-filter="High_Value" onclick="window.filterCat('High_Value')"><span class="dot" style="background:#8b5cf6"></span> High Value</button>
+          </div>
+        </div>
+
+        <div class="grid-3" style="margin-bottom:20px">
+          <div class="kpi"><div class="kpi-l">In view</div><div class="kpi-v mono" id="kpi-total">—</div><div class="kpi-s">Sampled from 50k real customers<br>Click to predict</div></div>
+          <div class="kpi"><div class="kpi-l">Avg monthly spend</div><div class="kpi-v mono" id="kpi-aov">—</div><div class="kpi-s">Across visible customers<br>Real Kaggle values</div></div>
+          <div class="kpi" style="background:linear-gradient(180deg, #faf5ff, #f5f0ff);border-color:#e9ddff"><div class="kpi-l" style="color:#7c3aed">High Value now</div><div class="kpi-v mono" id="kpi-risk" style="color:#4c1d95">—</div><div class="kpi-s">Top 11% of base<br>VIP treatment needed</div></div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="table" id="cust-table">
+            <thead><tr><th>Customer</th><th>Category</th><th>Age</th><th>Income</th><th>Months</th><th>Spend</th><th>Freq</th><th>Region</th><th>Payment</th></tr></thead>
+            <tbody id="cust-body"><tr><td colspan="9" style="padding:28px"><div style="display:flex;gap:12px;align-items:center"><div class="skeleton" style="width:32px;height:32px;border-radius:10px"></div><div style="flex:1"><div class="skeleton" style="width:120px;height:12px;margin-bottom:8px"></div><div class="skeleton" style="width:200px;height:10px"></div></div></div></td></tr></tbody>
+          </table>
+        </div>
+        <div style="margin-top:12px;font-size:11px;color:var(--muted2);display:flex;gap:8px;align-items:center"><span style="width:5px;height:5px;border-radius:50%;background:var(--muted2);display:inline-block"></span> Real Kaggle: 50k rows • 4 classes • Names added for readability • Data from rohit8527kmr7518</div>
+      </div>
+
+      <div id="tab-predict" class="tab">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;margin-bottom:22px">
+          <div><div class="h1">Predict category</div><div class="sub">Enter what you know about a customer. Model was trained on 50,000 real Kaggle customers and will tell you the category + what to do next. Auto-runs as you type.</div></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button type="button" class="btn" onclick="window.fillExample('high_value')">High Value</button><button type="button" class="btn" onclick="window.fillExample('loyal')">Loyal</button><button type="button" class="btn" onclick="window.fillExample('occasional')">Occasional</button><div style="width:1px;height:20px;background:var(--line);margin:0 4px"></div><label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);background:var(--panel);border:1px solid var(--line);padding:6px 10px;border-radius:10px;cursor:pointer;box-shadow:var(--shadow-sm)"><input type="checkbox" id="auto-predict" checked style="accent-color:var(--ink)"> Auto</label></div>
+        </div>
+
+        <div class="grid-2" style="align-items:start">
+          <div class="card card-pad" style="padding:20px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px"><div style="display:flex;gap:8px;align-items:center"><div style="width:28px;height:28px;border-radius:9px;background:var(--ink);color:white;display:grid;place-items:center;font-size:12px">◐</div><div><div style="font-size:12px;font-weight:650">Customer attributes</div><div style="font-size:11px;color:var(--muted)">12 features from Kaggle schema</div></div></div><div style="font-size:10px;color:var(--muted2)" class="mono" id="form-meta">ready • 50k model</div></div>
+
+            <div style="margin-bottom:18px"><div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted2);margin-bottom:10px;display:flex;align-items:center;gap:8px"><span style="width:18px;height:18px;border-radius:6px;background:var(--bg-soft);border:1px solid var(--line);display:grid;place-items:center;font-size:10px">👤</span> Who they are</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div><label class="label">Age</label><input class="input mono" id="in-age" type="number" value="34"></div>
+              <div><label class="label">Annual income (₹)</label><input class="input mono" id="in-annual_income" type="number" value="85000"></div>
+              <div><label class="label">Region</label><select class="input" id="in-region"><option>Urban</option><option selected>Semi-Urban</option><option>Rural</option></select></div>
+              <div><label class="label">Payment method</label><select class="input" id="in-payment_method"><option>Card</option><option>UPI</option><option selected>Wallet</option></select></div>
+            </div></div>
+
+            <div class="divider"></div>
+
+            <div style="margin-bottom:18px"><div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted2);margin-bottom:10px;display:flex;align-items:center;gap:8px"><span style="width:18px;height:18px;border-radius:6px;background:var(--bg-soft);border:1px solid var(--line);display:grid;place-items:center;font-size:10px">💳</span> How long & how much</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div><label class="label">Months active</label><input class="input mono" id="in-months_active" type="number" value="48"></div>
+              <div><label class="label">Avg monthly spend (₹)</label><input class="input mono" id="in-avg_monthly_spend" type="number" value="320"></div>
+              <div><label class="label">Purchase frequency / month</label><input class="input mono" id="in-purchase_frequency" type="number" step="0.1" value="3.2"></div>
+              <div><label class="label">Avg order value (₹)</label><input class="input mono" id="in-avg_order_value" type="number" value="180"></div>
+            </div></div>
+
+            <div class="divider"></div>
+
+            <div style="margin-bottom:16px"><div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted2);margin-bottom:10px;display:flex;align-items:center;gap:8px"><span style="width:18px;height:18px;border-radius:6px;background:var(--bg-soft);border:1px solid var(--line);display:grid;place-items:center;font-size:10px">◑</span> Behavior</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div><label class="label">Discount usage (0-1)</label><input class="input mono" id="in-discount_usage_rate" type="number" step="0.01" value="0.15"></div>
+              <div><label class="label">Return rate (0-1)</label><input class="input mono" id="in-return_rate" type="number" step="0.01" value="0.05"></div>
+              <div><label class="label">Browsing time (min)</label><input class="input mono" id="in-browsing_time_minutes" type="number" value="75"></div>
+              <div><label class="label">Support interactions</label><input class="input mono" id="in-support_interactions" type="number" value="1"></div>
+            </div></div>
+
+            <button type="button" class="btn btn-primary" style="width:100%;margin-top:8px;padding:12px;justify-content:center;font-size:13px;border-radius:12px" onclick="window.doPredict()"><span>✦</span> Predict category <span style="opacity:0.6">↵</span></button>
+            <div style="text-align:center;margin-top:10px;font-size:11px;color:var(--muted2);display:flex;gap:6px;justify-content:center;align-items:center"><span style="width:4px;height:4px;border-radius:50%;background:#22c55e;display:inline-block"></span> Auto runs as you type • Model: 50k Kaggle • 66.4% acc</div>
+          </div>
+
+          <div style="position:sticky;top:76px;display:flex;flex-direction:column;gap:14px">
+            <div class="card card-pad" id="result-card" style="min-height:420px;padding:20px">
+              <div id="result-empty" style="padding:36px 18px;text-align:center">
+                <div class="empty-illust">◐</div>
+                <div style="font-weight:700;font-size:14px;letter-spacing:-0.01em">No prediction yet</div>
+                <div style="font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.5;max-width:300px;margin-left:auto;margin-right:auto">Select a customer from the Customers tab — it will load here instantly — or fill the form. Real model, 50k customers learned.</div>
+                <div style="margin-top:16px;display:flex;gap:8px;justify-content:center"><button type="button" class="btn" onclick="window.fillExample('high_value')">Try High Value</button><button type="button" class="btn btn-ghost" onclick="window.switchTab('customers')">Browse customers</button></div>
+              </div>
+              <div id="result-content" style="display:none"></div>
+            </div>
+            <div class="card card-pad" style="padding:16px;background:linear-gradient(180deg, #fdfcfa, #f9f5ef);border-color:#ece3d8">
+              <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:28px;height:28px;border-radius:9px;background:white;border:1px solid var(--line);display:grid;place-items:center;font-size:13px;box-shadow:var(--shadow-sm);flex-shrink:0">◑</div><div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted2)">How we decide</div><div style="font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.6">Looks at income, spend, frequency, tenure, browsing, returns. Compares to 50,000 past customers. You see probabilities for each category — no black box.</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-segments" class="tab">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;margin-bottom:22px"><div><div class="h1">Segments</div><div class="sub">What each group means in practice — from real 50k Kaggle data, not theory.</div></div><div style="font-size:11px;color:var(--muted2);background:var(--panel);border:1px solid var(--line);padding:6px 10px;border-radius:10px" class="mono">4 classes • 50,000 customers</div></div>
+        <div class="grid-2">
+          <div class="card card-pad"><div style="display:flex;justify-content:space-between;align-items:center"><span class="pill pill-occasional"><span class="dot" style="background:#8a7d6e"></span> Occasional</span><span class="mono" style="font-size:11px;color:var(--muted2)">44% • 22,109</span></div><div style="margin-top:12px;font-size:14px;font-weight:650;letter-spacing:-0.01em">Buys rarely, low engagement</div><div style="font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.6">Biggest group. Low months_active, low frequency, low spend. Needs re-engagement: personalized offers, reminders, discount nudges. Avg spend ₹120, frequency 0.8/mo.</div><div style="margin-top:12px;display:flex;gap:6px"><span style="font-size:11px;background:var(--bg-soft);border:1px solid var(--line);padding:4px 9px;border-radius:999px">Low LTV</span><span style="font-size:11px;background:var(--bg-soft);border:1px solid var(--line);padding:4px 9px;border-radius:999px">Re-engage</span></div></div>
+          <div class="card card-pad"><div style="display:flex;justify-content:space-between;align-items:center"><span class="pill pill-regular"><span class="dot" style="background:#3b82f6"></span> Regular</span><span class="mono" style="font-size:11px;color:var(--muted2)">27% • 13,455</span></div><div style="margin-top:12px;font-size:14px;font-weight:650;letter-spacing:-0.01em">Consistent, regular buyer</div><div style="font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.6">Middle group. Moderate tenure, frequency ~2-3/mo. Nurture to Loyal: loyalty points, early access. Avg spend ₹280, frequency 2.5/mo.</div><div style="margin-top:12px;display:flex;gap:6px"><span style="font-size:11px;background:#eef4ff;border:1px solid #dbe6fe;padding:4px 9px;border-radius:999px">Growth pool</span><span style="font-size:11px;background:var(--bg-soft);border:1px solid var(--line);padding:4px 9px;border-radius:999px">Nurture</span></div></div>
+          <div class="card card-pad"><div style="display:flex;justify-content:space-between;align-items:center"><span class="pill pill-loyal"><span class="dot" style="background:#22c55e"></span> Loyal</span><span class="mono" style="font-size:11px;color:var(--muted2)">18% • 9,163</span></div><div style="margin-top:12px;font-size:14px;font-weight:650;letter-spacing:-0.01em">Long tenure, buys often</div><div style="font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.6">High engagement. Long months_active (60+), frequency 4+/mo, browsing 90+ min. Reward: perks, referrals, feedback. Avg spend ₹450, frequency 4.2/mo.</div><div style="margin-top:12px;display:flex;gap:6px"><span style="font-size:11px;background:#eefbf0;border:1px solid #d1f0d5;padding:4px 9px;border-radius:999px">Referral source</span><span style="font-size:11px;background:var(--bg-soft);border:1px solid var(--line);padding:4px 9px;border-radius:999px">Stable</span></div></div>
+          <div class="card card-pad" style="background:linear-gradient(180deg, #fdfcff, #f5f0ff);border-color:#e9ddff"><div style="display:flex;justify-content:space-between;align-items:center"><span class="pill pill-high_value"><span class="dot" style="background:#8b5cf6"></span> High Value</span><span class="mono" style="font-size:11px;color:#7c3aed">11% • 5,273 • VIP</span></div><div style="margin-top:12px;font-size:14px;font-weight:700;letter-spacing:-0.01em;color:#2e1065">Top tier, highest LTV</div><div style="font-size:12.5px;color:#5b4a6f;margin-top:8px;line-height:1.6">Smallest but most valuable. Income ₹95k+, AOV ₹250+, spend ₹600+, low return, low discount. VIP: dedicated manager, premium support, early access, no discount spam.</div><div style="margin-top:12px;display:flex;gap:6px"><span style="font-size:11px;background:white;border:1px solid #e9ddff;padding:4px 9px;border-radius:999px">High LTV</span><span style="font-size:11px;background:white;border:1px solid #e9ddff;padding:4px 9px;border-radius:999px">VIP</span></div></div>
+        </div>
+      </div>
+
+      <div id="tab-activity" class="tab">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:18px"><div><div class="h1">Activity</div><div class="sub">Recent predictions in this browser session — live from Kaggle model.</div></div><button type="button" class="btn btn-ghost" onclick="window.clearActivity()">Clear</button></div>
+        <div class="table-wrap"><table class="table"><thead><tr><th>Time</th><th>Customer</th><th>Category</th><th>Confidence</th><th>Latency</th><th>Action</th></tr></thead><tbody id="activity-body"><tr><td colspan="6" style="padding:24px;text-align:center;color:var(--muted)"><div class="empty-illust" style="width:36px;height:36px;font-size:16px">↻</div>No activity yet — make a prediction</td></tr></tbody></table></div>
+      </div>
+
+      <div id="tab-insights" class="tab">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;margin-bottom:22px"><div><div class="h1">Insights</div><div class="sub">Real patterns from 50,000 Kaggle customers — not vanity metrics. 66.4% accuracy, 0.86 ROC-AUC.</div></div><div style="display:flex;gap:8px"><div style="background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow-sm)"><div style="width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,0.15)"></div><span style="font-size:11px;font-weight:600">Live • 50k model</span></div></div></div>
+        <div class="grid-2">
+          <div class="card card-pad"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div style="font-size:13px;font-weight:700">Category distribution</div><div style="font-size:11.5px;color:var(--muted);margin-top:2px">From test set (7,500 customers) — real imbalance</div></div><div style="width:28px;height:28px;border-radius:9px;background:var(--bg-soft);border:1px solid var(--line);display:grid;place-items:center;font-size:12px">◫</div></div><canvas id="catChart" height="180" style="margin-top:14px"></canvas></div>
+          <div class="card card-pad"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div style="font-size:13px;font-weight:700">What drives category</div><div style="font-size:11.5px;color:var(--muted);margin-top:2px">Top features by importance • 50k data</div></div><div style="width:28px;height:28px;border-radius:9px;background:var(--bg-soft);border:1px solid var(--line);display:grid;place-items:center;font-size:12px">◑</div></div><canvas id="featChart" height="180" style="margin-top:14px"></canvas></div>
+        </div>
+        <div class="grid-2" style="margin-top:18px">
+          <div class="card card-pad"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div style="font-size:13px;font-weight:700">Customer map</div><div style="font-size:11.5px;color:var(--muted);margin-top:2px">Similar behavior = closer dots • t-SNE • 3k sample</div></div><div style="width:28px;height:28px;border-radius:9px;background:var(--bg-soft);border:1px solid var(--line);display:grid;place-items:center;font-size:12px">◍</div></div><canvas id="clusterChart" height="240" style="margin-top:14px"></canvas></div>
+          <div class="card card-pad"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:13px;font-weight:700">Performance • Real Kaggle model</div><div style="font-size:10px;background:var(--bg-soft);border:1px solid var(--line);padding:3px 8px;border-radius:999px" class="mono">7.5k test</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px">
+            <div style="border:1px solid var(--line);border-radius:12px;padding:14px;background:linear-gradient(180deg, white, var(--panel-soft))"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted2);font-weight:700">Accuracy</div><div class="mono" style="font-size:20px;margin-top:4px;font-weight:600" id="ins-acc">66.4%</div><div style="font-size:11px;color:var(--muted);margin-top:2px">On unseen 7,500</div></div>
+            <div style="border:1px solid var(--line);border-radius:12px;padding:14px;background:linear-gradient(180deg, white, var(--panel-soft))"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted2);font-weight:700">ROC-AUC</div><div class="mono" style="font-size:20px;margin-top:4px;font-weight:600" id="ins-auc">0.86</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Excellent separation</div></div>
+          </div><table class="table" style="margin-top:16px;min-width:auto"><thead><tr><th>Category</th><th>Prec</th><th>Rec</th><th>F1</th></tr></thead><tbody id="perf-body"></tbody></table><div style="margin-top:12px;padding:10px 12px;background:var(--bg-soft);border:1px solid var(--line);border-radius:10px;font-size:11px;color:var(--muted);line-height:1.5"><span style="font-weight:650;color:var(--ink)">Note:</span> 66% is good for real 4-class — random is 25%, majority baseline 44%. Occasional easiest (82% rec), Regular hardest (43% rec) — middle overlaps.</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast" style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--ink);color:white;padding:10px 16px;border-radius:999px;font-size:12px;font-weight:600;opacity:0;transition:all 0.4s var(--ease);pointer-events:none;z-index:50;box-shadow:var(--shadow-lg)">Copied</div>
+
+<script>
+{% raw %}
+let CUSTOMERS=[], FILTER='all', METRICS=null;
+
+window.switchTab = function(name){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelector(`[data-tab="${name}"]`)?.classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name)?.classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+window.filterCat = function(cat){
+  FILTER=cat;
+  document.querySelectorAll('[data-filter]').forEach(b=>{
+    const isActive=b.dataset.filter===cat;
+    b.style.background=isActive?'var(--ink)':'white';
+    b.style.color=isActive?'white':'var(--ink)';
+    b.style.borderColor=isActive?'var(--ink)':'var(--line)';
+    b.style.boxShadow=isActive?'0 2px 8px rgba(23,20,18,0.15)':'var(--shadow-sm)';
+  });
+  renderCustomers(CUSTOMERS);
+}
+
+function showToast(m){
+  const t=document.getElementById('toast');
+  if(!t) return;
+  t.textContent=m;
+  t.style.opacity='1';
+  t.style.transform='translateX(-50%) translateY(0)';
+  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(16px)';},2000);
+}
+
+function showDebug(msg){
+  const banner=document.getElementById('debug-banner');
+  if(!banner) return;
+  banner.style.display='block';
+  banner.innerHTML = '<b>⚠️ '+msg+'</b><br><span style="font-size:11px">Open <b>http://127.0.0.1:5000</b> not file://. Flask must be running.</span>';
+}
+
+async function loadCustomers(){
+  try{
+    const resp = await fetch('/api/customers');
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const data=await resp.json();
+    CUSTOMERS=data;
+    document.getElementById('count-customers').textContent=data.length;
+    renderCustomers(data);
+    const hv=data.filter(c=>c.category==='High_Value').length;
+    document.getElementById('kpi-risk').textContent=hv+' customers';
+    const avgSpend=Math.round(data.reduce((s,c)=>s+(c.avg_monthly_spend||0),0)/data.length);
+    document.getElementById('kpi-aov').textContent='₹'+avgSpend;
+    document.getElementById('kpi-total').textContent=data.length;
+  }catch(e){
+    console.error(e);
+    showDebug('Failed to load: '+e.message);
+    document.getElementById('cust-body').innerHTML=`<tr><td colspan=9 style="padding:24px"><div style="display:flex;gap:12px;align-items:center"><div style="width:36px;height:36px;border-radius:10px;background:#fef2f2;border:1px solid #fecaca;display:grid;place-items:center;color:#991b1b">!</div><div><div style="font-weight:650;color:#991b1b">Failed to load customers</div><div style="font-size:12px;color:var(--muted);margin-top:4px">${e.message}<br>Run <b>python app.py</b> and open <b>http://127.0.0.1:5000</b></div></div></div><div style="margin-top:12px"><button class="btn btn-primary" onclick="loadCustomers()">Retry</button></div></td></tr>`;
+  }
+}
+
+function renderCustomers(list){
+  const tbody=document.getElementById('cust-body');
+  if(!tbody) return;
+  if(FILTER!=='all') list=list.filter(c=>c.category===FILTER);
+  if(list.length===0){tbody.innerHTML='<tr><td colspan=9 style="text-align:center;padding:32px"><div class="empty-illust">◫</div><div style="font-weight:600">No customers match</div><div style="font-size:12px;color:var(--muted);margin-top:4px">Try different filter</div></td></tr>';return}
+  tbody.innerHTML=list.map(c=>{
+    return `<tr onclick="window.loadCustomer('${c.id}')"><td><div style="display:flex;align-items:center;gap:10px"><div style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg, #f7f3ef, #ece6f3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--ink-soft);box-shadow:var(--shadow-sm)">${c.initials||'C'}</div><div><div style="font-weight:600;font-size:13px;letter-spacing:-0.01em">${c.name||'Customer'}</div><div style="font-size:11px;color:var(--muted2)" class="mono">${c.id} • ${c.age}y • ${c.region}</div></div></div></td><td><span class="pill pill-${(c.category||'').toLowerCase()}"><span class="dot" style="background:${{Occasional:'#8a7d6e',Regular:'#3b82f6',Loyal:'#22c55e',High_Value:'#8b5cf6'}[c.category]||'#999'}"></span>${c.category}</span></td><td class="mono" style="font-weight:500">${c.age||0}</td><td class="mono">₹${Math.round(c.income||0).toLocaleString()}</td><td class="mono">${c.months_active||0}mo</td><td class="mono" style="font-weight:600">₹${Math.round(c.avg_monthly_spend||0)}</td><td class="mono">${(c.purchase_frequency||0).toFixed? (c.purchase_frequency||0).toFixed(1) : c.purchase_frequency}</td><td><span style="background:var(--bg-soft);border:1px solid var(--line);padding:3px 8px;border-radius:999px;font-size:11px">${c.region||''}</span></td><td><span style="background:var(--panel);border:1px solid var(--line);padding:3px 8px;border-radius:999px;font-size:11px">${c.payment_method||''}</span></td></tr>`;
+  }).join('');
+}
+
+window.loadCustomer = function(id){
+  const c=CUSTOMERS.find(x=>x.id===id);
+  if(!c) return;
+  try{
+    document.getElementById('in-age').value=c.age;
+    document.getElementById('in-annual_income').value=Math.round(c.income);
+    document.getElementById('in-months_active').value=c.months_active||24;
+    document.getElementById('in-avg_monthly_spend').value=Math.round(c.avg_monthly_spend||200);
+    document.getElementById('in-purchase_frequency').value=c.purchase_frequency||2.5;
+    document.getElementById('in-avg_order_value').value=Math.round(c.aov||150);
+    document.getElementById('in-discount_usage_rate').value=c.discount_usage_rate||0.15;
+    document.getElementById('in-return_rate').value=c.return_rate||0.05;
+    document.getElementById('in-browsing_time_minutes').value=Math.round(c.browsing_time_minutes||60);
+    document.getElementById('in-support_interactions').value=Math.round(c.support_interactions||1);
+    document.getElementById('in-region').value=c.region;
+    document.getElementById('in-payment_method').value=c.payment_method||'Card';
+    window.switchTab('predict');
+    showToast(`Loaded ${c.name} — ${c.category}`);
+    window.doPredict();
+  }catch(e){ console.error(e); }
+}
+
+let debounceTimer=null;
+function debouncePredict(){
+  const autoEl=document.getElementById('auto-predict');
+  if(autoEl && !autoEl.checked) return;
+  clearTimeout(debounceTimer);
+  debounceTimer=setTimeout(()=>window.doPredict(true),500);
+}
+
+window.doPredict = async function(silent=false){
+  const metaEl=document.getElementById('form-meta');
+  if(!silent && metaEl) metaEl.textContent='predicting…';
+  try{
+    const payload={
+      age: parseInt(document.getElementById('in-age').value)||34,
+      annual_income: parseFloat(document.getElementById('in-annual_income').value)||60000,
+      months_active: parseInt(document.getElementById('in-months_active').value)||24,
+      avg_monthly_spend: parseFloat(document.getElementById('in-avg_monthly_spend').value)||200,
+      purchase_frequency: parseFloat(document.getElementById('in-purchase_frequency').value)||2.5,
+      avg_order_value: parseFloat(document.getElementById('in-avg_order_value').value)||100,
+      discount_usage_rate: parseFloat(document.getElementById('in-discount_usage_rate').value)||0.15,
+      return_rate: parseFloat(document.getElementById('in-return_rate').value)||0.05,
+      browsing_time_minutes: parseFloat(document.getElementById('in-browsing_time_minutes').value)||60,
+      support_interactions: parseFloat(document.getElementById('in-support_interactions').value)||1,
+      payment_method: document.getElementById('in-payment_method').value,
+      region: document.getElementById('in-region').value
+    };
+    const resp=await fetch('/api/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const res=await resp.json();
+    if(res.error) throw new Error(res.error);
+    const colors={'Occasional':'#8a7d6e','Regular':'#3b82f6','Loyal':'#22c55e','High_Value':'#8b5cf6'};
+    document.getElementById('result-empty').style.display='none';
+    const rc=document.getElementById('result-content');
+    rc.style.display='block';
+    rc.innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px">
+        <div style="flex:1"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="pill pill-${res.prediction.toLowerCase()}" style="font-size:13px;padding:6px 12px"><span class="dot" style="background:${colors[res.prediction]||'#999'}"></span>${res.prediction}</span><span class="mono" style="font-size:11px;color:var(--muted);background:var(--bg-soft);border:1px solid var(--line);padding:3px 8px;border-radius:999px">${(res.confidence*100).toFixed(0)}% • ${res.latency_ms.toFixed(0)}ms</span></div><div style="font-size:13px;margin-top:14px;line-height:1.6;color:var(--ink-soft)"><b>${res.business_action}</b></div></div>
+        <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg, var(--ink), var(--ink-soft));color:white;display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:14px;box-shadow:var(--shadow-md);flex-shrink:0">${(res.confidence*100).toFixed(0)}%</div>
+      </div>
+      <div style="margin-top:18px;display:flex;flex-direction:column;gap:8px">${Object.entries(res.probabilities).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div style="display:flex;align-items:center;gap:10px"><div style="width:88px;font-size:11px;font-weight:650;color:var(--muted)">${k}</div><div class="bar" style="flex:1;height:8px"><div class="bar-fill" style="width:${v*100}%;background:${colors[k]||'#171412'}"></div></div><div class="mono" style="width:36px;font-size:11px;text-align:right;font-weight:600">${(v*100).toFixed(0)}%</div></div>`).join('')}</div>
+      <div style="margin-top:16px;padding:12px 14px;background:linear-gradient(180deg, var(--bg-soft), #f5f1eb);border:1px solid var(--line);border-radius:12px;font-size:12px;color:var(--muted);line-height:1.6"><div style="display:flex;gap:8px;align-items:flex-start"><span style="width:20px;height:20px;border-radius:7px;background:white;border:1px solid var(--line);display:grid;place-items:center;font-size:10px;flex-shrink:0;margin-top:1px">◑</span><span><b style="color:var(--ink)">Why:</b> Income ₹${payload.annual_income.toLocaleString()}, spend ₹${payload.avg_monthly_spend}, freq ${payload.purchase_frequency}/mo, active ${payload.months_active}mo. Matches <b style="color:var(--ink)">${res.prediction}</b> pattern from 50k customers. <span class="mono" style="font-size:10px;color:var(--muted2)">ID ${res.request_id}</span></span></div></div>
+      <div style="margin-top:14px;display:flex;gap:8px"><button type="button" class="btn" onclick="navigator.clipboard.writeText('${res.prediction}');showToast('Copied ${res.prediction}')">Copy</button><button type="button" class="btn btn-ghost" onclick="window.switchTab('activity')">View in activity →</button></div>
+    `;
+    if(metaEl) metaEl.textContent=`done • ${res.latency_ms.toFixed(0)}ms • live`;
+    addActivity({time:new Date().toLocaleTimeString(), name:'Manual', category:res.prediction, conf:res.confidence, latency:res.latency_ms, action:res.business_action});
+    loadHealth();
+  }catch(e){
+    console.error(e);
+    document.getElementById('result-content').innerHTML=`<div style="color:#991b1b;font-size:12px;padding:14px;background:#fef2f2;border:1px solid #fecaca;border-radius:12px">Error: ${e.message}<br><br>Make sure Flask is running at http://127.0.0.1:5000</div>`;
+    document.getElementById('result-content').style.display='block';
+    document.getElementById('result-empty').style.display='none';
+    if(metaEl) metaEl.textContent='error';
+  }
+}
+
+window.fillExample = function(type){
+  const m={
+    'high_value':{age:45,annual_income:120000,months_active:72,avg_monthly_spend:650,purchase_frequency:4.5,avg_order_value:280,discount_usage_rate:0.05,return_rate:0.02,browsing_time_minutes:95,support_interactions:0,region:'Urban',payment_method:'Card'},
+    'loyal':{age:38,annual_income:75000,months_active:60,avg_monthly_spend:420,purchase_frequency:4.0,avg_order_value:180,discount_usage_rate:0.12,return_rate:0.08,browsing_time_minutes:85,support_interactions:1,region:'Urban',payment_method:'Wallet'},
+    'regular':{age:32,annual_income:55000,months_active:36,avg_monthly_spend:280,purchase_frequency:2.8,avg_order_value:120,discount_usage_rate:0.18,return_rate:0.12,browsing_time_minutes:65,support_interactions:1,region:'Semi-Urban',payment_method:'UPI'},
+    'occasional':{age:28,annual_income:35000,months_active:12,avg_monthly_spend:110,purchase_frequency:0.8,avg_order_value:85,discount_usage_rate:0.35,return_rate:0.25,browsing_time_minutes:25,support_interactions:3,region:'Rural',payment_method:'Wallet'}
+  };
+  const ex=m[type]; if(!ex) return;
+  Object.keys(ex).forEach(k=>{const el=document.getElementById('in-'+k); if(el) el.value=ex[k];});
+  showToast(`Loaded ${type.replace('_',' ')} example`);
+  window.doPredict();
+}
+
+let activities=[];
+function addActivity(a){
+  activities.unshift(a);
+  if(activities.length>20) activities.pop();
+  renderActivity();
+  document.getElementById('count-activity').textContent=activities.length;
+}
+function renderActivity(){
+  const tbody=document.getElementById('activity-body');
+  if(!tbody) return;
+  if(activities.length===0){tbody.innerHTML='<tr><td colspan=6 style="padding:28px;text-align:center"><div class="empty-illust" style="width:36px;height:36px">↻</div><div style="font-weight:600">No activity yet</div><div style="font-size:12px;color:var(--muted);margin-top:4px">Make a prediction to see it here</div></td></tr>';return}
+  tbody.innerHTML=activities.map(a=>`<tr><td class="mono" style="font-size:11px">${a.time}</td><td style="font-size:12.5px;font-weight:500">${a.name}</td><td><span class="pill pill-${a.category.toLowerCase()}"><span class="dot" style="background:${{Occasional:'#8a7d6e',Regular:'#3b82f6',Loyal:'#22c55e',High_Value:'#8b5cf6'}[a.category]||'#999'}"></span>${a.category}</span></td><td class="mono" style="font-weight:600">${(a.conf*100).toFixed(0)}%</td><td class="mono">${a.latency.toFixed(0)}ms</td><td style="font-size:11.5px;color:var(--muted);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.action}</td></tr>`).join('');
+}
+window.clearActivity = function(){ activities=[];renderActivity();document.getElementById('count-activity').textContent='0';showToast('Cleared'); }
+
+async function loadMetrics(){
+  try{
+    const resp=await fetch('/api/metrics');
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const m=await resp.json();
+    METRICS=m;
+    document.getElementById('acc-side').textContent=(m.test_accuracy*100).toFixed(1)+'%';
+    document.getElementById('acc-bar').style.width=(m.test_accuracy*100).toFixed(0)+'%';
+    document.getElementById('ins-acc').textContent=(m.test_accuracy*100).toFixed(1)+'%';
+    document.getElementById('ins-auc').textContent=m.roc_auc_ovr.toFixed(2);
+    const tbody=document.getElementById('perf-body');
+    if(tbody){
+      tbody.innerHTML='';
+      Object.keys(m.classification_report).forEach(k=>{
+        if(['accuracy','macro avg','weighted avg'].includes(k)) return;
+        const r=m.classification_report[k];
+        if(typeof r!=='object') return;
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td><span class="pill pill-${k.toLowerCase()}" style="font-size:11px"><span class="dot" style="background:${{Occasional:'#8a7d6e',Regular:'#3b82f6',Loyal:'#22c55e',High_Value:'#8b5cf6'}[k]||'#999'}"></span>${k}</span></td><td class="mono" style="font-weight:600">${(r.precision*100).toFixed(0)}%</td><td class="mono">${(r.recall*100).toFixed(0)}%</td><td class="mono">${(r['f1-score']*100).toFixed(0)}%</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    drawCharts();
+  }catch(e){ console.error(e); }
+}
+
+function drawCharts(){
+  try{
+    if(typeof Chart==='undefined') return;
+    const ctx1=document.getElementById('catChart')?.getContext('2d');
+    if(ctx1 && METRICS){
+      const report=METRICS.classification_report;
+      const labels=[],data=[];
+      Object.keys(report).forEach(k=>{
+        if(['accuracy','macro avg','weighted avg'].includes(k)) return;
+        if(typeof report[k]!=='object') return;
+        labels.push(k); data.push(report[k].support);
+      });
+      new Chart(ctx1,{type:'bar',data:{labels:labels,datasets:[{data:data,backgroundColor:['#8a7d6e','#3b82f6','#22c55e','#8b5cf6'],borderRadius:8,barThickness:22}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#8a847c',font:{size:11,weight:500}}},y:{grid:{color:'#f5f2ed'},ticks:{color:'#8a847c'}}}}});
+    }
+    const ctx2=document.getElementById('featChart')?.getContext('2d');
+    if(ctx2 && METRICS){
+      const imps=METRICS.tree_importances?.['random_forest']||Object.values(METRICS.tree_importances||{})[0];
+      if(imps && METRICS.feature_names){
+        const sorted=imps.map((v,i)=>({v,i})).sort((a,b)=>b.v-a.v).slice(0,6);
+        new Chart(ctx2,{type:'bar',data:{labels:sorted.map(s=> (METRICS.feature_names[s.i]||'feat').slice(0,18)),datasets:[{data:sorted.map(s=>s.v),backgroundColor:'#171412',borderRadius:8}]},options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:'#f5f2ed'}},y:{grid:{display:false},ticks:{color:'#57534e',font:{size:11}}}}}});
+      }
+    }
+    fetch('/api/unsupervised').then(r=>r.json()).then(u=>{
+      try{
+        const ctx3=document.getElementById('clusterChart')?.getContext('2d');
+        if(!ctx3 || typeof Chart==='undefined') return;
+        const colors={'Occasional':'#8a7d6e','Regular':'#3b82f6','Loyal':'#22c55e','High_Value':'#8b5cf6'};
+        const datasets={};
+        if(u.tsne && u.tsne.transformed){
+          u.tsne.transformed.forEach((p,i)=>{
+            const cat=u.tsne.categories[i];
+            if(!datasets[cat]) datasets[cat]={label:cat,data:[],backgroundColor:colors[cat]||'#171412',pointRadius:3,pointHoverRadius:5};
+            datasets[cat].data.push({x:p[0],y:p[1]});
+          });
+        }
+        new Chart(ctx3,{type:'scatter',data:{datasets:Object.values(datasets)},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,boxHeight:10,usePointStyle:true,pointStyle:'circle',padding:16,font:{size:11,weight:500}}}},scales:{x:{display:false},y:{display:false}}}});
+      }catch(e){}
+    }).catch(()=>{});
+  }catch(e){}
+}
+
+async function loadHealth(){
+  try{
+    const resp=await fetch('/api/monitoring');
+    if(!resp.ok) return;
+    const data=await resp.json();
+    document.getElementById('top-stats-text').textContent=`${data.drift_metrics.requests_last_24h} predictions • ${data.drift_metrics.avg_latency_ms.toFixed(0)}ms avg • live`;
+  }catch{}
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.querySelectorAll('.nav-item').forEach(el=>{
+    el.addEventListener('click', ()=>{ const tab = el.dataset.tab; if(tab) window.switchTab(tab); });
+  });
+  const searchEl=document.getElementById('search');
+  if(searchEl){
+    searchEl.addEventListener('input', e=>{
+      const q=e.target.value.toLowerCase();
+      renderCustomers(CUSTOMERS.filter(c=> (c.name||'').toLowerCase().includes(q) || (c.category||'').toLowerCase().includes(q) || (c.id||'').toLowerCase().includes(q)));
+    });
+  }
+  document.querySelectorAll('#tab-predict input, #tab-predict select').forEach(el=>{
+    el.addEventListener('input', debouncePredict);
+    el.addEventListener('change', debouncePredict);
+  });
+  document.addEventListener('keydown', e=>{
+    if(e.key==='Enter' && document.getElementById('tab-predict')?.classList.contains('active')) window.doPredict();
+    if(e.key==='/' && e.target.tagName!=='INPUT' && e.target.tagName!=='SELECT'){ e.preventDefault(); document.getElementById('search')?.focus(); }
+  });
+  if(window.location.protocol==='file:'){ showDebug('Open http://127.0.0.1:5000 not file://'); }
+  loadCustomers();
+  loadMetrics();
+  loadHealth();
+  setInterval(loadHealth,4000);
+});
+{% endraw %}
+</script>
+</body>
+</html>

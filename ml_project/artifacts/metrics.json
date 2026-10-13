@@ -1,0 +1,348 @@
+{
+  "cv_scores_mean": 0.6664762992575671,
+  "cv_scores_std": 0.0033520344011031657,
+  "cv_scores_all": [
+    0.6700456881781839,
+    0.6697601370645345,
+    0.660908052541405,
+    0.665191319246145,
+    0.6664762992575671
+  ],
+  "grid_best_params": {
+    "C": 10
+  },
+  "grid_best_score": 0.6667904106468002,
+  "random_best_params": {
+    "n_estimators": 150,
+    "min_samples_split": 10,
+    "max_depth": 15
+  },
+  "random_best_score": 0.7516276450196254,
+  "bayesian_trials": [
+    {
+      "C": 0.05,
+      "mean_cv": 0.6650771259771299
+    },
+    {
+      "C": 0.2,
+      "mean_cv": 0.6662193092339413
+    },
+    {
+      "C": 0.5,
+      "mean_cv": 0.66653341709021
+    },
+    {
+      "C": 2,
+      "mean_cv": 0.6667047453125656
+    },
+    {
+      "C": 5,
+      "mean_cv": 0.6667904106468002
+    }
+  ],
+  "test_accuracy": 0.6648,
+  "roc_auc_ovr": 0.8686478431283623,
+  "classification_report": {
+    "High_Value": {
+      "precision": 0.7092511013215859,
+      "recall": 0.6106194690265486,
+      "f1-score": 0.65625,
+      "support": 791.0
+    },
+    "Loyal": {
+      "precision": 0.6091644204851752,
+      "recall": 0.6574545454545454,
+      "f1-score": 0.6323889471843301,
+      "support": 1375.0
+    },
+    "Occasional": {
+      "precision": 0.7262569832402235,
+      "recall": 0.8232810615199035,
+      "f1-score": 0.7717314487632508,
+      "support": 3316.0
+    },
+    "Regular": {
+      "precision": 0.5513959390862944,
+      "recall": 0.43062438057482655,
+      "f1-score": 0.4835837506956038,
+      "support": 2018.0
+    },
+    "accuracy": 0.6648,
+    "macro avg": {
+      "precision": 0.6490171110333197,
+      "recall": 0.6304948641439561,
+      "f1-score": 0.6359885366607962,
+      "support": 7500.0
+    },
+    "weighted avg": {
+      "precision": 0.6559471814417618,
+      "recall": 0.6648,
+      "f1-score": 0.6564749393841497,
+      "support": 7500.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      483,
+      180,
+      92,
+      36
+    ],
+    [
+      93,
+      904,
+      135,
+      243
+    ],
+    [
+      54,
+      104,
+      2730,
+      428
+    ],
+    [
+      51,
+      296,
+      802,
+      869
+    ]
+  ],
+  "classes": [
+    "High_Value",
+    "Loyal",
+    "Occasional",
+    "Regular"
+  ],
+  "bias_variance": [
+    {
+      "model": "multinomial_l2_lbfgs",
+      "train_acc": 0.6672758423757853,
+      "val_acc": 0.6600267379679144,
+      "gap": 0.007249104407870854
+    },
+    {
+      "model": "multinomial_l1",
+      "train_acc": 0.6671616219303256,
+      "val_acc": 0.6594919786096257,
+      "gap": 0.007669643320699859
+    },
+    {
+      "model": "multinomial_l2_C0.1",
+      "train_acc": 0.6667904054825814,
+      "val_acc": 0.6584224598930482,
+      "gap": 0.008367945589533243
+    },
+    {
+      "model": "multinomial_l2_C10",
+      "train_acc": 0.6674471730439748,
+      "val_acc": 0.6602941176470588,
+      "gap": 0.007153055396916019
+    },
+    {
+      "model": "multinomial_elasticnet",
+      "train_acc": 0.6672758423757853,
+      "val_acc": 0.6596256684491979,
+      "gap": 0.0076501739265874
+    }
+  ],
+  "feature_names": [
+    "age",
+    "annual_income",
+    "months_active",
+    "avg_monthly_spend",
+    "purchase_frequency",
+    "avg_order_value",
+    "discount_usage_rate",
+    "return_rate",
+    "browsing_time_minutes",
+    "support_interactions",
+    "payment_method_Card",
+    "payment_method_UPI",
+    "payment_method_Wallet",
+    "region_Rural",
+    "region_Semi-Urban",
+    "region_Urban"
+  ],
+  "linear_coefficients": [
+    [
+      -0.05993181685544191,
+      0.001566750464290271,
+      1.6724422315173246,
+      1.1223310509908824,
+      1.1707588287183361,
+      -0.5938998612030738,
+      -0.03881900069912692,
+      0.014147663014719725,
+      0.07731320293976879,
+      0.008258091867137354,
+      -0.3990283715391369,
+      -0.4298215724329242,
+      -0.4627305272279135,
+      -0.6247622536478888,
+      -0.40529477095797367,
+      -0.2615234465941122
+    ],
+    [
+      -0.021075150739744856,
+      0.010446950800081244,
+      0.6160036182901993,
+      -0.16723834574769086,
+      0.3695939614447671,
+      -1.4945333751109022,
+      0.03658480151592368,
+      -0.0007639979537834527,
+      0.013332383720049423,
+      0.005084839443069553,
+      -0.11887603284352559,
+      -0.09784733120352937,
+      -0.09408394345221983,
+      -0.11935793431390432,
+      -0.11733786742586848,
+      -0.07411150575950143
+    ],
+    [
+      0.09075211593161009,
+      -0.0018106532442704409,
+      -1.397842357879182,
+      -0.2641055880464003,
+      -1.1476613568694571,
+      1.4279301675586193,
+      -0.07373483764088683,
+      -0.007421011957158542,
+      -0.18046263188976275,
+      0.020738722756949608,
+      0.2890433724244468,
+      0.3164967751164383,
+      0.3113752353634461,
+      0.6860605027792142,
+      0.27998891859325137,
+      -0.04913403846813302
+    ],
+    [
+      -0.009745148336423247,
+      -0.010203048020100537,
+      -0.8906034919283433,
+      -0.6909871171967925,
+      -0.3926914332936455,
+      0.6605030687553586,
+      0.07596903682409015,
+      -0.005962653103777202,
+      0.08981704522994516,
+      -0.034081654067156957,
+      0.2288610319582152,
+      0.21117212852001488,
+      0.2454392353166876,
+      0.05805968518257895,
+      0.24264371979059166,
+      0.3847689908217479
+    ]
+  ],
+  "tree_importances": {
+    "decision_tree_gini": [
+      0.0024767281760331994,
+      0.0005800257108939536,
+      0.3093382956889274,
+      0.1339484505727322,
+      0.3320634246121873,
+      0.15850009982071947,
+      0.008405423300210189,
+      0.0021479678525003344,
+      0.024394599681323438,
+      0.008224998684121545,
+      0.00015978578860981925,
+      4.7071777765918676e-05,
+      0.0,
+      0.011599829808427976,
+      0.0003909549262470506,
+      0.007722343599300255
+    ],
+    "random_forest": [
+      0.0247385532478236,
+      0.026513440452082884,
+      0.2357648785553107,
+      0.1068084144230395,
+      0.2745645496418388,
+      0.18836289652005386,
+      0.03204277431845842,
+      0.02650144851999802,
+      0.04159471260403101,
+      0.014490549564535883,
+      0.0031364462048277977,
+      0.0030173870045772724,
+      0.0027608086671102893,
+      0.007287977748719639,
+      0.003298657800967889,
+      0.009116504726624427
+    ]
+  },
+  "feature_store": {
+    "description": "Centralized feature definitions with versioning - real Kaggle dataset",
+    "version": "v3.0-kaggle",
+    "dataset_source": "Kaggle - Online Retail Customer Segmentation Dataset (rohit8527kmr7518) - 50,000 customers",
+    "dataset_file": "retail_customer_segmentation.csv",
+    "rows": 50000,
+    "numeric_features": [
+      "age",
+      "annual_income",
+      "months_active",
+      "avg_monthly_spend",
+      "purchase_frequency",
+      "avg_order_value",
+      "discount_usage_rate",
+      "return_rate",
+      "browsing_time_minutes",
+      "support_interactions"
+    ],
+    "categorical_features": [
+      "payment_method",
+      "region"
+    ],
+    "target": "customer_segment",
+    "classes": [
+      "Occasional",
+      "Regular",
+      "Loyal",
+      "High_Value"
+    ],
+    "class_distribution": {
+      "Occasional": 22109,
+      "Regular": 13455,
+      "Loyal": 9163,
+      "High_Value": 5273
+    },
+    "missing_values": {
+      "annual_income": 3075,
+      "avg_monthly_spend": 2520,
+      "purchase_frequency": 1979,
+      "discount_usage_rate": 2549,
+      "return_rate": 2487,
+      "browsing_time_minutes": 3934,
+      "support_interactions": 1988
+    },
+    "transformations": {
+      "numeric": [
+        "median_imputation",
+        "standard_scaling"
+      ],
+      "categorical": [
+        "most_frequent_imputation",
+        "one_hot_encoding"
+      ]
+    },
+    "created_at": "2025-09-21",
+    "training_serving_skew_prevention": [
+      "Same imputer statistics used in training and serving",
+      "Same scaler mean/std reused",
+      "Same one-hot categories reused",
+      "Feature order enforced via ColumnTransformer",
+      "Input validation schema checked at inference",
+      "customer_id ignored (not a feature)"
+    ]
+  },
+  "sklearn_version": "1.8.0",
+  "split_info": {
+    "train": 35020,
+    "val": 7480,
+    "test": 7500
+  }
+}

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Debug - Lens</title>
+<style>
+body{font-family:system-ui,sans-serif;padding:20px;background:#fafaf9}
+.btn{padding:10px 16px;background:#1c1917;color:white;border-radius:8px;border:none;cursor:pointer;margin:5px}
+.tab{display:none;padding:20px;background:white;border:1px solid #e7e5e4;border-radius:12px;margin-top:10px}
+.tab.active{display:block}
+.nav{padding:8px 12px;background:white;border:1px solid #e7e5e4;border-radius:8px;cursor:pointer;margin:5px;display:inline-block}
+.nav.active{background:#1c1917;color:white}
+</style>
+</head>
+<body>
+<h1>Lens Debug - If this works, Flask is OK</h1>
+<p>Open at <b>http://127.0.0.1:5000/debug</b></p>
+<div>
+  <div class="nav active" data-tab="customers" onclick="switchTab('customers')">Customers</div>
+  <div class="nav" data-tab="predict" onclick="switchTab('predict')">Predict</div>
+  <div class="nav" data-tab="test" onclick="switchTab('test')">Test API</div>
+</div>
+<div id="tab-customers" class="tab active">
+  <h3>Customers Tab - Click should work</h3>
+  <button class="btn" onclick="alert('JS works!')">Test Click Me</button>
+  <p id="customers-status">Loading...</p>
+  <div id="customers-list"></div>
+</div>
+<div id="tab-predict" class="tab">
+  <h3>Predict Tab</h3>
+  <p>Nav works if you see this!</p>
+  <button class="btn" onclick="testPredict()">Test Predict API</button>
+  <pre id="predict-result"></pre>
+</div>
+<div id="tab-test" class="tab">
+  <h3>API Tests</h3>
+  <button class="btn" onclick="testAPI('/api/metrics')">Test /api/metrics</button>
+  <button class="btn" onclick="testAPI('/api/customers')">Test /api/customers</button>
+  <pre id="api-result" style="background:#f5f5f4;padding:12px;border-radius:8px;overflow:auto;max-height:300px"></pre>
+</div>
+<script>
+function switchTab(name){
+  console.log('switchTab', name);
+  document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelector(`.nav[data-tab="${name}"]`)?.classList.add('active');
+  document.getElementById('tab-'+name)?.classList.add('active');
+}
+async function testAPI(path){
+  const out=document.getElementById('api-result');
+  out.textContent='Fetching '+path+'...';
+  try{
+    const resp=await fetch(path);
+    const text=await resp.text();
+    out.textContent='Status: '+resp.status+'\n\n'+text.slice(0,2000);
+  }catch(e){ out.textContent='Error: '+e.message; }
+}
+async function loadCustomers(){
+  const status=document.getElementById('customers-status');
+  try{
+    const resp=await fetch('/api/customers');
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const data=await resp.json();
+    status.textContent='Loaded '+data.length+' customers';
+    document.getElementById('customers-list').innerHTML=data.slice(0,5).map(c=>`<div>${c.name} - ${c.category}</div>`).join('');
+  }catch(e){ status.textContent='Failed: '+e.message; }
+}
+async function testPredict(){
+  const out=document.getElementById('predict-result');
+  out.textContent='Testing...';
+  try{
+    const resp=await fetch('/api/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({age:34,annual_income:60000,months_active:24,avg_monthly_spend:200,purchase_frequency:2.5,avg_order_value:100,discount_usage_rate:0.15,return_rate:0.05,browsing_time_minutes:60,support_interactions:1,payment_method:'Card',region:'Urban'})});
+    const data=await resp.json();
+    out.textContent=JSON.stringify(data,null,2).slice(0,2000);
+  }catch(e){ out.textContent='Error: '+e.message; }
+}
+document.addEventListener('DOMContentLoaded', ()=>{ console.log('Debug loaded'); loadCustomers(); });
+</script>
+</body>
+</html>
